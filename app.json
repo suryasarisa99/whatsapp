@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "wa",
+    "name": "Whats App",
     "slug": "wa",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,16 +15,24 @@
       "**/*"
     ],
     "ios": {
+      "buildNumber": "1.0.0",
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.suryasarisa99.wa"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f454d3da-8c30-4236-8430-1cf7b1578fb6"
+      }
     }
   }
 }
