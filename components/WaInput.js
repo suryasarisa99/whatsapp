@@ -39,7 +39,7 @@ export default function WaInput({ sendMessge }) {
     </View>
   );
 }
-s = StyleSheet.create({
+const s = StyleSheet.create({
   v: {
     flexDirection: "row",
     alignItems: "center",

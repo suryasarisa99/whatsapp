@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 const DataContext = createContext();
 
 export default function DataProvider({ children }) {
@@ -10,11 +11,66 @@ export default function DataProvider({ children }) {
   const [names, setNames] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS !== "web") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          alert("Sorry, we need camera roll permissions to make this work!");
+        }
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     // if (chats.length > 0) saveArrayToAsyncStorage("chats", chats);
     saveArrayToAsyncStorage("chats", chats);
   }, [chats]);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    return new Promise((resolve, reject) => {
+      if (!result.canceled) resolve(result.assets[0].uri);
+      else reject("Image selection cancelled");
+    });
+  };
+
+  const reduceImageQuality = async (uri) => {
+    const result = await ImageManipulator.manipulateAsync(
+      uri,
+      [],
+      { compress: 0.1 } // 0.1 means 10% quality
+    );
+    return result.uri;
+  };
+
+  const saveImageFile = async (uri, fileName, path) => {
+    try {
+      const fileUri = FileSystem.documentDirectory + path + "/" + fileName;
+      await FileSystem.copyAsync({
+        from: uri,
+        to: fileUri,
+      });
+      console.log("Image saved successfully!");
+      return fileUri;
+    } catch (error) {
+      console.error("Error saving image:", error);
+    }
+  };
+
+  const getImageFile = (fileName, path) => {
+    const fileUri = FileSystem.documentDirectory + path + "/" + fileName;
+    return fileUri;
+  };
 
   const saveDataToFile = async (data, fileName) => {
     try {
@@ -77,6 +133,10 @@ export default function DataProvider({ children }) {
         showMenu,
         setShowMenu,
         setShowModal,
+        pickImage,
+        reduceImageQuality,
+        saveImageFile,
+        getImageFile,
         saveDataToFile,
         retrieveDataFromFile,
         saveArrayToAsyncStorage,

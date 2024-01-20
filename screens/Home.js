@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
+  Image,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
@@ -15,10 +16,20 @@ import * as FileSystem from "expo-file-system";
 import { DataContext } from "../DataContext";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 // import { ScrollView } from "react-native-gesture-handler";
-
+import ChatItem from "../components/ChatItem";
 export default function Home({ navigation }) {
-  const { data, setData, names, setNames, chats, retrieveDataFromFile } =
-    useContext(DataContext);
+  const {
+    data,
+    setData,
+    names,
+    setNames,
+    chats,
+    retrieveDataFromFile,
+    pickImage,
+    getImageFile,
+  } = useContext(DataContext);
+  const [image, setImage] = useState();
+
   const selectFile = async () => {
     let result = await DocumentPicker.getDocumentAsync();
     let fileUri = result.assets[0].uri;
@@ -28,107 +39,60 @@ export default function Home({ navigation }) {
     const d = getMessages2(text);
     setNames(Array.from(new Set(d.slice(0, 8).map((item) => item.name))));
     setData(d);
-    navigation.navigate("Chat", { name: "none" });
+    navigation.navigate("Chat", {
+      chatItem: {
+        chatWith: names[0],
+        chatFrom: names[1],
+        mssg: d[d.lenght - 1]?.mssg,
+        date: d[d.lenght - 1]?.date,
+      },
+    });
   };
 
-  const onSelect = async (item) => {
-    const d = await retrieveDataFromFile(item);
+  const onSelect = async (chatItem) => {
+    const d = await retrieveDataFromFile(
+      chatItem.chatWith + "|x|" + chatItem.chatFrom
+    );
     setNames(Array.from(new Set(d.slice(0, 8).map((item) => item.name))));
     setData(d);
-    navigation.navigate(item, { name: item.name });
+    navigation.navigate(chatItem.chatWith, { chatItem });
   };
-
-  function ChatItem({ item }) {
-    return (
-      <Pressable onPress={() => onSelect(item.name)}>
-        <View style={s.chatItem}>
-          <MaterialCommunityIcons
-            name="face-man-profile"
-            size={32}
-            color="#a4a4a4"
-          />
-          <View>
-            <View style={s.chatTop}>
-              <Text style={s.chatName}>{item.name}</Text>
-              <Text style={s.chatDate}>{item.date}</Text>
-            </View>
-            <Text style={s.chatMssg}>{item.mssg}</Text>
-          </View>
-        </View>
-      </Pressable>
-    );
-  }
 
   return (
     <View style={s.v}>
-      <ScrollView style={s.sv}>
-        {chats.map((chatName, index) => {
-          return <ChatItem key={chatName + index} item={chatName} />;
-        })}
+      <ScrollView>
+        {chats.map((chatItem, index) => (
+          <ChatItem
+            key={chatItem.chatWith + "xx" + index}
+            item={chatItem}
+            index={index}
+            onSelect={onSelect}
+          />
+        ))}
       </ScrollView>
 
-      <TouchableOpacity onPress={selectFile}>
+      <Pressable onPress={selectFile}>
         <View style={s.fab}>
-          {/* <Entypo name="plus" size={32} color="#444444" /> */}
-          {/* <Entypo name="message" size={28} col#cacaca4444" /> */}
-          <Entypo name="message" size={28} color="#a4a4a4" />
+          <MaterialCommunityIcons name="message" size={24} color="white" />
         </View>
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
 
 s = StyleSheet.create({
-  sv: {
-    // minHeight: Dimensions.get("window").height,
-    // flex: 1,
-  },
-  chatItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderBottomWidth: 0.3,
-    borderColor: "#4f4f4f",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 25,
-  },
-  chatTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "90%",
-  },
-  chatName: {
-    fontSize: 19,
-    color: "white",
-    color: "#a4a4a4",
-  },
-  chatMssg: {
-    fontSize: 14,
-    color: "white",
-    color: "#a4a4a4",
-  },
-  chatDate: {
-    color: "#a4a4a4",
-    paddingLeft: 5,
-    fontSize: 12,
-  },
   fab: {
     position: "absolute",
-    bottom: 25,
+    bottom: 20,
     right: 20,
     padding: 12,
     borderRadius: 8,
     backgroundColor: "#131315",
-    // backgroundColor: "#000000",
-    // borderColor: "#636363",
-    // borderWidth: 0.3,
     elevation: 5,
   },
   v: {
+    position: "relative",
     flex: 1,
-    minHeight: "100",
-    height: Dimensions.get("window").height,
   },
 });
 

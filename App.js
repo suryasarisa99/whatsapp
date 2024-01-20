@@ -86,7 +86,7 @@ function Main() {
         />
         {chats.map((chatItem, index) => (
           <Stack.Screen
-            name={chatItem.name}
+            name={chatItem.chatWith}
             key={index}
             component={Chat}
             options={{

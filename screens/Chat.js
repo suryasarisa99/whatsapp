@@ -6,32 +6,24 @@ import {
   Button,
   Modal,
   Pressable,
+  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { useContext, memo, useState } from "react";
 import { DataContext } from "../DataContext";
-import { TextInput } from "react-native-gesture-handler";
 import WaInput from "../components/WaInput";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Menu from "../components/Menu";
+import SaveDialog from "../components/SaveDialog";
+import Save from "../components/Save";
 export default function Chat({ route, navigation }) {
-  const {
-    data,
-    setData,
-    names,
-    showModal,
-    setShowModal,
-    chats,
-    setChats,
-    saveDataToFile,
-    showMenu,
-    setShowMenu,
-    retrieveDataFromFile,
-    saveArrayToAsyncStorage,
-    getArrayFromAsyncStorage,
-  } = useContext(DataContext);
-  const [newChatName, setNewChatName] = useState("");
-  const [direction, setDirection] = useState(0);
+  const { data, setData, names, setChats, showMenu, setShowMenu } =
+    useContext(DataContext);
+  const { chatItem } = route.params;
+  const [direction, setDirection] = useState(chatItem.direction || 0);
   const [inverted, setInverted] = useState(true);
-  const { name = "none" } = route.params;
+  const [focus, setFocus] = useState(false);
+  const [mssg, setMssg] = useState("");
 
   function sendMessge(newMssg) {
     setData([
@@ -41,77 +33,20 @@ export default function Chat({ route, navigation }) {
   }
   return (
     <View style={{ flex: 1, marginTop: 0 }}>
-      <Modal transparent={true} visible={showModal} animationType="slide">
-        <View style={s.modalContainer}>
-          <View style={s.modalContent}>
-            <Text style={s.popupTextHead}>Save File As</Text>
-            <TextInput
-              value={newChatName}
-              onChangeText={setNewChatName}
-              style={s.input}
-            />
-            <View style={s.buttons}>
-              <Btn title="Cancel" onPress={() => setShowModal(false)} />
-              <Btn
-                title="Save"
-                onPress={() => {
-                  if (chats.find((item) => item.name === newChatName))
-                    alert("Chat name already exists");
-                  else {
-                    setShowModal(false);
-                    setChats([
-                      ...chats,
-                      {
-                        name: newChatName,
-                        date: data[data.length - 1].date,
-                        mssg: data[data.length - 1].mssg,
-                      },
-                    ]);
-                    saveDataToFile(data, newChatName);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent={true} visible={showMenu} animationType="none">
-        <View style={s.menuContainer}>
-          <Pressable style={{ flex: 1 }} onPress={() => setShowMenu(false)}>
-            <View style={s.b}>
-              <Pressable onPress={() => {}}>
-                <View style={s.menuContent}>
-                  <MenuItem
-                    title={inverted ? "Go Top" : "Go Bottom"}
-                    onPress={() => {
-                      setInverted((prev) => !prev);
-                      setShowMenu(false);
-                    }}
-                  />
-                  <MenuItem
-                    title="swap"
-                    onPress={() => {
-                      setDirection((prev) => (prev === 0 ? 1 : 0));
-                      setShowMenu(false);
-                    }}
-                  />
-                  <MenuItem
-                    title="Delete Chat"
-                    onPress={() => {
-                      setChats((chats) =>
-                        chats.filter((item) => item.name !== name)
-                      );
-                      navigation.navigate("Home");
-                      setShowMenu(false);
-                    }}
-                  />
-                </View>
-              </Pressable>
-            </View>
-          </Pressable>
-        </View>
-      </Modal>
+      {/* <SaveDialog /> */}
+      <Save date={chatItem.date} />
+      <Menu
+        {...{
+          navigation,
+          showMenu,
+          setShowMenu,
+          setInverted,
+          setDirection,
+          setChats,
+          name: chatItem.chatWith,
+          inverted,
+        }}
+      />
 
       {inverted ? (
         <FlatList
@@ -122,7 +57,7 @@ export default function Chat({ route, navigation }) {
               return <ChatA itemData={itemData} />;
             else return <ChatB itemData={itemData} />;
           }}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item, index) => "inverted" + index.toString()}
           initialNumToRender={10}
           windowSize={10}
           maxToRenderPerBatch={500}
@@ -145,10 +80,7 @@ export default function Chat({ route, navigation }) {
           // onEndReachedThreshold={0.5}
         />
       )}
-
-      <View>
-        <WaInput sendMessge={sendMessge} />
-      </View>
+      <WaInput sendMessge={sendMessge} />
     </View>
   );
 }
@@ -170,6 +102,7 @@ function MenuItem({ title, onPress }) {
     </TouchableOpacity>
   );
 }
+
 const ChatA = memo(({ itemData }) => {
   return (
     <View style={[, s.textOuter, s.textOuterA]}>
@@ -184,6 +117,7 @@ const ChatB = memo(({ itemData }) => {
     </View>
   );
 });
+
 const s = StyleSheet.create({
   container: {
     flex: 1,
@@ -274,35 +208,5 @@ const s = StyleSheet.create({
   btnText: {
     color: "#dedede",
     fontSize: 16,
-  },
-  menuContainer: {
-    flex: 1,
-    // justifyContent: "flex-end",
-    // alignItems: "flex-end",
-    // backgroundColor: "rgba(0, 0, 0, 0.7)",
-    // backgroundColor: "#180000",
-  },
-  b: {
-    flex: 1,
-  },
-  menuContent: {
-    position: "absolute",
-    right: 10,
-    top: 50,
-    minWidth: 150,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    backgroundColor: "#0e0f10",
-    // backgroundColor: "blue",
-    borderRadius: 10,
-    color: "#fff",
-    textColor: "#fff",
-  },
-  menuItem: {
-    color: "#a4a4a4",
-    // backgroundColor: "red",
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    fontSize: 17,
   },
 });
