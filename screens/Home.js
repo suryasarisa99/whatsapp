@@ -8,7 +8,9 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  SafeAreaView,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { useState, useContext } from "react";
 import * as DocumentPicker from "expo-document-picker";
@@ -46,6 +48,7 @@ export default function Home({ navigation }) {
         mssg: d[d.lenght - 1]?.mssg,
         date: d[d.lenght - 1]?.date,
       },
+      notSaved: true,
     });
   };
 
@@ -55,7 +58,8 @@ export default function Home({ navigation }) {
     );
     setNames(Array.from(new Set(d.slice(0, 8).map((item) => item.name))));
     setData(d);
-    navigation.navigate(chatItem.chatWith, { chatItem });
+    navigation.navigate("Chat", { chatItem });
+    // navigation.navigate(chatItem.chatWith, { chatItem });
   };
 
   return (

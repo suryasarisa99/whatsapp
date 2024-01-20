@@ -8,6 +8,7 @@ import {
   Image,
   TouchableHighlight,
 } from "react-native";
+import * as Animatable from "react-native-animatable";
 import { useState, useContext, useEffect } from "react";
 import { DataContext } from "../DataContext";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -35,7 +36,8 @@ export default function Save({ date, mssg }) {
   const [chatFrom, setChatFrom] = useState("");
   //   setShowModal(false);
   return (
-    <Modal transparent={false} visible={showModal} animationType="slide">
+    <Modal transparent={false} visible={showModal} animationType="none">
+      {/* <Animatable.View animation="slideInDown"> */}
       <View style={s.container}>
         <View style={s.center}>
           <Pressable
@@ -127,12 +129,14 @@ export default function Save({ date, mssg }) {
                 console.log(x);
                 setChats((prv) => [...prv, x]);
                 saveDataToFile(data, chatWith + "|x|" + chatFrom);
-                saveImageFile(image, chatWith + "|x|" + chatFrom, "image");
-                saveImageFile(
-                  low_res_img,
-                  chatWith + "|x|" + chatFrom,
-                  "thumb"
-                );
+                if (image) {
+                  saveImageFile(image, chatWith + "|x|" + chatFrom, "image");
+                  saveImageFile(
+                    low_res_img,
+                    chatWith + "|x|" + chatFrom,
+                    "thumb"
+                  );
+                }
                 setShowModal(false);
               }}
             >
@@ -141,6 +145,7 @@ export default function Save({ date, mssg }) {
           </View>
         </View>
       </View>
+      {/* </Animatable.View> */}
     </Modal>
   );
 }

@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React from "react";
-
+import { useContext, useState } from "react";
+import { DataContext } from "../DataContext";
 export default function Menu({
   navigation,
   showMenu,
@@ -15,9 +16,10 @@ export default function Menu({
   setInverted,
   setDirection,
   setChats,
-  name,
+  chatItem,
   inverted,
 }) {
+  const { deleteFile } = useContext(DataContext);
   return (
     <Modal transparent={true} visible={showMenu} animationType="none">
       <View style={s.menuContainer}>
@@ -44,11 +46,16 @@ export default function Menu({
                   onPress={() => {
                     setChats((chats) =>
                       chats.filter((item) => {
-                        console.log(item.chatWith, name);
-                        return item.chatWith !== name;
+                        return item.chatWith !== chatItem.chatWith;
                       })
                     );
                     navigation.navigate("Home");
+                    let filename = `${chatItem.chatWith}|x|${chatItem.chatFrom}`;
+                    deleteFile(filename);
+                    if (chatItem.hasImg) {
+                      deleteFile("image/" + filename);
+                      deleteFile("thumb/" + filename);
+                    }
                     setShowMenu(false);
                   }}
                 />

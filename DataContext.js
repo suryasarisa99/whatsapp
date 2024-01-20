@@ -34,7 +34,7 @@ export default function DataProvider({ children }) {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
 
@@ -79,6 +79,20 @@ export default function DataProvider({ children }) {
       console.log("Data saved successfully!");
     } catch (error) {
       console.error("Error saving data:", error);
+    }
+  };
+  const deleteFile = async (fileName) => {
+    const fileUri = FileSystem.documentDirectory + fileName;
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
+      if (fileInfo.exists) {
+        await FileSystem.deleteAsync(fileUri);
+        console.log("File deleted successfully");
+      } else {
+        console.log("File does not exist");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
     }
   };
 
@@ -136,6 +150,7 @@ export default function DataProvider({ children }) {
         pickImage,
         reduceImageQuality,
         saveImageFile,
+        deleteFile,
         getImageFile,
         saveDataToFile,
         retrieveDataFromFile,

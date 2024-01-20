@@ -14,6 +14,7 @@ import Chat from "./screens/Chat";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useContext, useEffect } from "react";
 import { DataContext } from "./DataContext";
+import Profile from "./components/Profile";
 const Stack = createStackNavigator();
 
 function Main() {
@@ -68,23 +69,17 @@ function Main() {
           name={"Chat"}
           component={Chat}
           options={{
-            headerRightContainerStyle: {
-              paddingRight: 20,
-            },
-            headerRight: (props) => (
-              <View>
-                <Pressable
-                  onPress={() => {
-                    setShowModal(true);
-                  }}
-                >
-                  <MaterialIcons name="save-alt" size={24} color="white" />
-                </Pressable>
-              </View>
-            ),
+            headerShown: false,
           }}
         />
-        {chats.map((chatItem, index) => (
+        <Stack.Screen
+          name={"Profile"}
+          component={Profile}
+          options={{
+            headerShown: false,
+          }}
+        />
+        {/* {chats.map((chatItem, index) => (
           <Stack.Screen
             name={chatItem.chatWith}
             key={index}
@@ -115,7 +110,7 @@ function Main() {
               },
             }}
           />
-        ))}
+        ))} */}
       </Stack.Navigator>
     </NavigationContainer>
   );
