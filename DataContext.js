@@ -8,6 +8,7 @@ const DataContext = createContext();
 export default function DataProvider({ children }) {
   const [chats, setChats] = useState([]);
   const [data, setData] = useState([]);
+  const [dbChat, setDbChat] = useState([]);
   const [names, setNames] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -156,6 +157,8 @@ export default function DataProvider({ children }) {
         retrieveDataFromFile,
         saveArrayToAsyncStorage,
         getArrayFromAsyncStorage,
+        dbChat,
+        setDbChat,
       }}
     >
       {children}

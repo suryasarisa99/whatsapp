@@ -62,7 +62,7 @@ export default function Chat({ route, navigation }) {
             style={{
               paddingHorizontal: 8,
               paddingVertical: 5,
-              marginRight: 8,
+              marginRight: 2,
             }}
             name="chevron-left"
             size={28}
