@@ -15,7 +15,25 @@ import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { useContext, useEffect } from "react";
 import { DataContext } from "./DataContext";
 import Profile from "./components/Profile";
+import DbChatScreen from "./DbChat/DbChatScreen";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+
 const Stack = createStackNavigator();
+
+const selectDb = async () => {
+  let result = await DocumentPicker.getDocumentAsync();
+  if (result.type == "cancel") return;
+  let fileUri = result.assets[0].uri;
+  let fileInfo = await FileSystem.getInfoAsync(fileUri);
+
+  const localUri = FileSystem.documentDirectory + "SQLite/surya.db";
+  await FileSystem.copyAsync({
+    from: fileUri,
+    to: localUri,
+  });
+  console.log("Copied sql file");
+};
 
 function Main() {
   const {
@@ -58,7 +76,17 @@ function Main() {
               paddingLeft: 5,
             },
             headerLeft: () => (
-              <FontAwesome name="whatsapp" size={24} color="white" />
+              <Pressable
+                onPress={() => {
+                  console.log("wa icon press");
+                }}
+                onLongPress={() => {
+                  console.log("wa icon -------- press");
+                  selectDb();
+                }}
+              >
+                <FontAwesome name="whatsapp" size={24} color="white" />
+              </Pressable>
             ),
             headerLeftContainerStyle: {
               paddingLeft: 20,
@@ -75,6 +103,13 @@ function Main() {
         <Stack.Screen
           name={"Profile"}
           component={Profile}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name={"DbChatScreen"}
+          component={DbChatScreen}
           options={{
             headerShown: false,
           }}

@@ -86,7 +86,7 @@ export default function Profile({
             color="white"
           />
         )}
-        <Text style={s.contact}>{chatItem.chatWith}</Text>
+        <Text style={s.contact}>{chatItem.chatWith || chatItem.contact}</Text>
       </View>
     </View>
     // </Modal>

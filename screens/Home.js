@@ -1,24 +1,15 @@
-import {
-  View,
-  Text,
-  Button,
-  FlatList,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  Image,
-  Dimensions,
-  SafeAreaView,
-  TouchableOpacity,
-  StatusBar,
-} from "react-native";
-import { useState, useContext } from "react";
-import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system";
+import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import { useState, useContext, useEffect } from "react";
 import { DataContext } from "../DataContext";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system";
+import * as SQLite from "expo-sqlite";
+import * as Contacts from "expo-contacts";
+
 // import { ScrollView } from "react-native-gesture-handler";
 import ChatItem from "../components/ChatItem";
+import DbChatItem from "../DbChat/DbChatItem";
 export default function Home({ navigation }) {
   const {
     data,
@@ -29,11 +20,15 @@ export default function Home({ navigation }) {
     retrieveDataFromFile,
     pickImage,
     getImageFile,
+    dbChat,
+    setDbChat,
   } = useContext(DataContext);
-  const [image, setImage] = useState();
+  const [dbChatList, setDbChatList] = useState([]);
+  const [contacts, setContacts] = useState([]);
 
   const selectFile = async () => {
     let result = await DocumentPicker.getDocumentAsync();
+    if (result.type == "cancel") return;
     let fileUri = result.assets[0].uri;
     let fileInfo = await FileSystem.getInfoAsync(fileUri);
     let text = await FileSystem.readAsStringAsync(fileUri);
@@ -52,14 +47,104 @@ export default function Home({ navigation }) {
     });
   };
 
+  useEffect(() => {
+    const id = 18;
+
+    const query_chatlist = `
+      SELECT
+          message.chat_row_id as id, 
+          count(*) as count, 
+          jid.user as no, 
+          chat.subject as group_name,
+          last_message.text_data as mssg,
+          last_message.timestamp as date
+      FROM
+          message
+      JOIN
+          chat ON chat._id = message.chat_row_id
+      JOIN
+          jid ON chat.jid_row_id = jid._id
+      JOIN
+          message as last_message ON chat.last_message_row_id = last_message._id
+      WHERE
+          message.text_data IS NOT NULL
+      GROUP BY
+          message.chat_row_id
+      HAVING
+          count(message.chat_row_id) > 0
+      ORDER BY
+          date DESC
+      LIMIT 100;
+      `;
+    async function get_sql_chat_list() {
+      try {
+        const db = SQLite.openDatabase("surya.db");
+        await db.transactionAsync(async (tx) => {
+          console.log("fetching from db");
+          const result = await tx.executeSqlAsync(query_chatlist, []);
+          setDbChatList(result.rows);
+        }, true);
+      } catch (error) {
+        console.log("Error:", error);
+      }
+    }
+    async function getContacts() {
+      const { status } = await Contacts.requestPermissionsAsync();
+      if (status === "granted") {
+        const { data } = await Contacts.getContactsAsync({
+          // fields: [Contacts.Fields.Emails, Contacts.Fields.PhoneNumbers],
+          fields: [Contacts.Fields.PhoneNumbers],
+        });
+
+        if (data.length > 0) {
+          setContacts(
+            data
+              .filter((item) => item?.phoneNumbers?.[0]?.number)
+              .map((item) => ({
+                no: item?.phoneNumbers?.[0]?.number?.replace(/\s/g, ""),
+                name: item?.name,
+                key: item?.lookupKey,
+              }))
+          );
+        }
+      }
+    }
+    get_sql_chat_list();
+    getContacts();
+  }, []);
+
   const onSelect = async (chatItem) => {
     const d = await retrieveDataFromFile(
       chatItem.chatWith + "|x|" + chatItem.chatFrom
     );
     setNames(Array.from(new Set(d.slice(0, 8).map((item) => item.name))));
     setData(d);
+    setDbChat([]);
     navigation.navigate("Chat", { chatItem });
     // navigation.navigate(chatItem.chatWith, { chatItem });
+  };
+
+  const onDbChatSelect = async (chatItem, contact) => {
+    const query_chat = `SELECT
+      _id , from_me as me, text_data as mssg, message_type as type
+      FROM message
+      WHERE chat_row_id = ${chatItem.id} AND text_data IS NOT NULL;
+      `;
+    try {
+      const db = SQLite.openDatabase("surya.db");
+      await db.transactionAsync(async (tx) => {
+        console.log("fetching from db");
+        const result = await tx.executeSqlAsync(query_chat, []);
+        console.log(result.rows);
+        setDbChat(result.rows);
+        setData([]);
+        navigation.navigate("DbChatScreen", {
+          chatItem: { ...chatItem, contact },
+        });
+      }, true);
+    } catch (error) {
+      console.log("Error:", error);
+    }
   };
 
   return (
@@ -73,9 +158,30 @@ export default function Home({ navigation }) {
             onSelect={onSelect}
           />
         ))}
+        {dbChatList.map((chatItem, index) => {
+          return (
+            <DbChatItem
+              contact={
+                chatItem.group_name ||
+                contacts.find((item) => item.no.includes(chatItem.no))?.name ||
+                chatItem.no
+              }
+              isGroup={chatItem.group_name ? true : false}
+              key={chatItem.no}
+              item={chatItem}
+              onDbChatSelect={onDbChatSelect}
+            />
+          );
+        })}
       </ScrollView>
 
-      <Pressable onPress={selectFile}>
+      <Pressable
+        onPress={selectFile}
+        onLongPress={() => {
+          console.log("long press");
+        }}
+        delayLongPress={800}
+      >
         <View style={s.fab}>
           <MaterialCommunityIcons name="message" size={24} color="white" />
         </View>
