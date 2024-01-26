@@ -3,6 +3,8 @@ import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import * as SQLite from "expo-sqlite";
+
 const DataContext = createContext();
 
 export default function DataProvider({ children }) {
@@ -13,7 +15,6 @@ export default function DataProvider({ children }) {
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [image, setImage] = useState(null);
-
   useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {

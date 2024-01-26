@@ -22,6 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": ["android.permission.WRITE_EXTERNAL_STORAGE"],
       "package": "com.suryasarisa99.wa"
     },
     "web": {

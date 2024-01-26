@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ScrollView,
+  Button,
+  PermissionsAndroid,
+} from "react-native";
 import { useState, useContext, useEffect } from "react";
 import { DataContext } from "../DataContext";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -6,7 +14,6 @@ import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
 import * as SQLite from "expo-sqlite";
 import * as Contacts from "expo-contacts";
-
 // import { ScrollView } from "react-native-gesture-handler";
 import ChatItem from "../components/ChatItem";
 import DbChatItem from "../DbChat/DbChatItem";
@@ -76,6 +83,29 @@ export default function Home({ navigation }) {
           date DESC
       LIMIT 100;
       `;
+    async function requestStoragePermission() {
+      try {
+        console.log(">>>>>>>>>   requesting permission");
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          {
+            title: "Storage Permission",
+            message:
+              "This app needs access to your storage to download Photos.",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log(">>>>>>       You can use the storage");
+        } else {
+          console.log(">>>>> =   Storage permission denied");
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
     async function get_sql_chat_list() {
       try {
         const db = SQLite.openDatabase("surya.db");
@@ -109,6 +139,7 @@ export default function Home({ navigation }) {
         }
       }
     }
+    requestStoragePermission();
     get_sql_chat_list();
     getContacts();
   }, []);
@@ -125,17 +156,22 @@ export default function Home({ navigation }) {
   };
 
   const onDbChatSelect = async (chatItem, contact) => {
-    const query_chat = `SELECT
-      _id , from_me as me, text_data as mssg, message_type as type
-      FROM message
-      WHERE chat_row_id = ${chatItem.id} AND text_data IS NOT NULL;
-      `;
+    const query_chat = `
+    SELECT 
+      message._id, 
+      message.from_me as me, 
+      message.text_data as mssg, 
+      message.message_type as type,
+      message_media.file_path as image
+    FROM message
+    LEFT JOIN message_media ON message._id = message_media.message_row_id
+    WHERE message.chat_row_id = ${chatItem.id} And type != 7;
+    `;
     try {
       const db = SQLite.openDatabase("surya.db");
       await db.transactionAsync(async (tx) => {
         console.log("fetching from db");
         const result = await tx.executeSqlAsync(query_chat, []);
-        console.log(result.rows);
         setDbChat(result.rows);
         setData([]);
         navigation.navigate("DbChatScreen", {

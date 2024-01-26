@@ -21,20 +21,6 @@ import * as FileSystem from "expo-file-system";
 
 const Stack = createStackNavigator();
 
-const selectDb = async () => {
-  let result = await DocumentPicker.getDocumentAsync();
-  if (result.type == "cancel") return;
-  let fileUri = result.assets[0].uri;
-  let fileInfo = await FileSystem.getInfoAsync(fileUri);
-
-  const localUri = FileSystem.documentDirectory + "SQLite/surya.db";
-  await FileSystem.copyAsync({
-    from: fileUri,
-    to: localUri,
-  });
-  console.log("Copied sql file");
-};
-
 function Main() {
   const {
     showModal,
@@ -51,6 +37,61 @@ function Main() {
       console.log(data);
     });
   }, []);
+
+  async function get_sql_chat_list() {
+    const query_chatlist = `
+      SELECT
+          message.chat_row_id as id, 
+          count(*) as count, 
+          jid.user as no, 
+          chat.subject as group_name,
+          last_message.text_data as mssg,
+          last_message.timestamp as date
+      FROM
+          message
+      JOIN
+          chat ON chat._id = message.chat_row_id
+      JOIN
+          jid ON chat.jid_row_id = jid._id
+      JOIN
+          message as last_message ON chat.last_message_row_id = last_message._id
+      WHERE
+          message.text_data IS NOT NULL
+      GROUP BY
+          message.chat_row_id
+      HAVING
+          count(message.chat_row_id) > 0
+      ORDER BY
+          date DESC
+      LIMIT 100;
+      `;
+    try {
+      const db = SQLite.openDatabase("surya.db");
+      await db.transactionAsync(async (tx) => {
+        console.log("fetching from db");
+        const result = await tx.executeSqlAsync(query_chatlist, []);
+        setDbChatList(result.rows);
+      }, true);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  }
+
+  const selectDb = async () => {
+    let result = await DocumentPicker.getDocumentAsync();
+    if (result.type == "cancel") return;
+    let fileUri = result.assets[0].uri;
+    let fileInfo = await FileSystem.getInfoAsync(fileUri);
+
+    const localUri = FileSystem.documentDirectory + "SQLite/surya.db";
+    await FileSystem.copyAsync({
+      from: fileUri,
+      to: localUri,
+    });
+    console.log("Copied sql file");
+    get_sql_chat_list();
+  };
+
   return (
     <NavigationContainer
       theme={{

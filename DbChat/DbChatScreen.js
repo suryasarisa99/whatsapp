@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Image } from "react-native";
 import { memo, useState, useContext } from "react";
 import { DataContext } from "../DataContext";
 import { StatusBar } from "expo-status-bar";
 import DbChatTopBar from "./DbChatTopBar";
+import { PermissionsAndroid } from "react-native";
+import DbMessg from "./DbMessg";
 import WaInput from "../components/WaInput";
 export default function DbChatScreen({ navigation, route }) {
   const { dbChat, setDbChat } = useContext(DataContext);
@@ -15,8 +17,7 @@ export default function DbChatScreen({ navigation, route }) {
         inverted={true}
         data={[...dbChat].reverse()}
         renderItem={(itemData, index) => {
-          if (itemData.item.me === 1) return <ChatA itemData={itemData} />;
-          else return <ChatB itemData={itemData} />;
+          return <DbMessg item={itemData.item} />;
         }}
         keyExtractor={(item, index) => "inverted" + index.toString()}
         initialNumToRender={10}
@@ -34,22 +35,11 @@ export default function DbChatScreen({ navigation, route }) {
   );
 }
 
-const ChatA = memo(({ itemData }) => {
-  return (
-    <View style={[, s.textOuter, s.textOuterA]}>
-      <Text style={[s.textMssg, s.textMssgA]}>{itemData.item.mssg}</Text>
-    </View>
-  );
-});
-const ChatB = memo(({ itemData }) => {
-  return (
-    <View style={[, s.textOuter, s.textOuterB]}>
-      <Text style={[s.textMssg, s.textMssgB]}>{itemData.item.mssg}</Text>
-    </View>
-  );
-});
-
 const s = StyleSheet.create({
+  m: {
+    backgroundColor: "blue",
+    // width: "70%",
+  },
   container: {
     flex: 1,
     backgroundColor: "#000000",
@@ -59,45 +49,15 @@ const s = StyleSheet.create({
     width: "100%",
   },
 
-  textOuter: {
-    flexDirection: "row",
-    width: "100%",
-    marginBottom: 8,
-  },
-  textOuterA: {
-    justifyContent: "flex-end",
-    paddingRight: 7,
-  },
-  textOuterB: {
-    justifyContent: "flex-start",
-    marginLeft: 7,
-  },
-
-  textMssg: {
-    maxWidth: "82%",
-    color: "white",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    fontSize: 16,
-    borderRadius: 15,
-  },
-  textMssgA: {
-    backgroundColor: "#005c4b",
-    backgroundColor: "#1e1920",
-  },
-  textMssgB: {
-    backgroundColor: "#202c33",
-    backgroundColor: "#1b2023",
-  },
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    // justifyContent: "center",
+    // alignItems: "center",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    // justifyContent: "center",
+    // alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   modalContent: {
