@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   StatusBar,
+  Linking,
   TouchableOpacity,
 } from "react-native";
 import { useContext, useState } from "react";
@@ -52,6 +53,14 @@ export default function Profile({
       <View style={s.center}>
         {chatItem.hasImg ? (
           <Pressable
+            onPress={() => {
+              Linking.openURL(
+                getImageFile(
+                  `${chatItem.chatWith}|x|${chatItem.chatFrom}`,
+                  "image"
+                )
+              );
+            }}
             onLongPress={() => {
               console.log("long pressed");
               setLongPress((prv) => !prv);

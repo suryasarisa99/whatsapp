@@ -29,8 +29,9 @@ export default function Home({ navigation }) {
     getImageFile,
     dbChat,
     setDbChat,
+    dbChatList,
+    setDbChatList,
   } = useContext(DataContext);
-  const [dbChatList, setDbChatList] = useState([]);
   const [contacts, setContacts] = useState([]);
 
   const selectFile = async () => {
@@ -55,34 +56,6 @@ export default function Home({ navigation }) {
   };
 
   useEffect(() => {
-    const id = 18;
-
-    const query_chatlist = `
-      SELECT
-          message.chat_row_id as id, 
-          count(*) as count, 
-          jid.user as no, 
-          chat.subject as group_name,
-          last_message.text_data as mssg,
-          last_message.timestamp as date
-      FROM
-          message
-      JOIN
-          chat ON chat._id = message.chat_row_id
-      JOIN
-          jid ON chat.jid_row_id = jid._id
-      JOIN
-          message as last_message ON chat.last_message_row_id = last_message._id
-      WHERE
-          message.text_data IS NOT NULL
-      GROUP BY
-          message.chat_row_id
-      HAVING
-          count(message.chat_row_id) > 0
-      ORDER BY
-          date DESC
-      LIMIT 100;
-      `;
     async function requestStoragePermission() {
       try {
         console.log(">>>>>>>>>   requesting permission");
@@ -106,18 +79,7 @@ export default function Home({ navigation }) {
         console.warn(err);
       }
     }
-    async function get_sql_chat_list() {
-      try {
-        const db = SQLite.openDatabase("surya.db");
-        await db.transactionAsync(async (tx) => {
-          console.log("fetching from db");
-          const result = await tx.executeSqlAsync(query_chatlist, []);
-          setDbChatList(result.rows);
-        }, true);
-      } catch (error) {
-        console.log("Error:", error);
-      }
-    }
+
     async function getContacts() {
       const { status } = await Contacts.requestPermissionsAsync();
       if (status === "granted") {
@@ -140,7 +102,6 @@ export default function Home({ navigation }) {
       }
     }
     requestStoragePermission();
-    get_sql_chat_list();
     getContacts();
   }, []);
 
@@ -162,10 +123,15 @@ export default function Home({ navigation }) {
       message.from_me as me, 
       message.text_data as mssg, 
       message.message_type as type,
-      message_media.file_path as image
+      message_media.file_path as image,
+      GROUP_CONCAT(message_poll_option.option_name) as options
     FROM message
-    LEFT JOIN message_media ON message._id = message_media.message_row_id
-    WHERE message.chat_row_id = ${chatItem.id} And type != 7;
+    LEFT JOIN 
+        message_media ON message._id = message_media.message_row_id
+    LEFT JOIN
+        message_poll_option On message._id = message_poll_option.message_row_id
+    WHERE message.chat_row_id = ${chatItem.id} And type != 7
+    Group By message._id;
     `;
     try {
       const db = SQLite.openDatabase("surya.db");
@@ -173,6 +139,7 @@ export default function Home({ navigation }) {
         console.log("fetching from db");
         const result = await tx.executeSqlAsync(query_chat, []);
         setDbChat(result.rows);
+        console.log(result.rows);
         setData([]);
         navigation.navigate("DbChatScreen", {
           chatItem: { ...chatItem, contact },

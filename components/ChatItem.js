@@ -18,7 +18,7 @@ export default function ChatItem({ item, onSelect }) {
       <View style={s.chatItem}>
         {item.hasImg ? (
           <Image
-            style={{ width: 60, height: 60, borderRadius: 50 }}
+            style={{ width: 50, height: 50, borderRadius: 50 }}
             source={{
               uri: getImageFile(`${item.chatWith}|x|${item.chatFrom}`, "thumb"),
             }}
@@ -47,11 +47,9 @@ const s = StyleSheet.create({
     // flex: 1,
     paddingVertical: 14,
     paddingHorizontal: 15,
-    borderBottomWidth: 0.3,
-    borderColor: "#4f4f4f",
     flexDirection: "row",
     alignItems: "center",
-    gap: 25,
+    gap: 15,
   },
   chatTop: {
     // flex: 1,
@@ -61,9 +59,10 @@ const s = StyleSheet.create({
     // width: "90%",
   },
   chatName: {
-    fontSize: 19,
+    fontSize: 18,
     color: "white",
-    color: "#a4a4a4",
+    fontWeight: "500",
+    color: "#ededed",
   },
   chatMssg: {
     fontSize: 14,

@@ -3,13 +3,13 @@ import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import * as SQLite from "expo-sqlite";
 
 const DataContext = createContext();
 
 export default function DataProvider({ children }) {
   const [chats, setChats] = useState([]);
   const [data, setData] = useState([]);
+  const [dbChatList, setDbChatList] = useState([]);
   const [dbChat, setDbChat] = useState([]);
   const [names, setNames] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -160,6 +160,8 @@ export default function DataProvider({ children }) {
         getArrayFromAsyncStorage,
         dbChat,
         setDbChat,
+        dbChatList,
+        setDbChatList,
       }}
     >
       {children}

@@ -15,12 +15,15 @@ export default function DbChatItem({ item, contact, onDbChatSelect, isGroup }) {
   const [profilePic, setProfilePic] = useState(null);
 
   return (
-    <Pressable onPress={() => onDbChatSelect(item, contact)}>
+    <Pressable
+      onPress={() => onDbChatSelect(item, contact)}
+      android_ripple={{ color: "#2e3034ac" }}
+    >
       <View style={s.chatItem}>
         <MaterialCommunityIcons
           name="face-man-profile"
           size={50}
-          color="#a4a4a4"
+          color="#e1e1e1"
         />
         <View style={{ flex: 1 }}>
           <View style={s.chatTop}>
@@ -29,13 +32,15 @@ export default function DbChatItem({ item, contact, onDbChatSelect, isGroup }) {
                 s.chatName,
                 isGroup && contact.length > 30 ? { fontSize: 14 } : {},
               ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              {contact}
+              {contact} {item.id}
             </Text>
             <Text style={s.chatDate}>{formatDate(item.date).date}</Text>
           </View>
-          <Text style={[s.chatMssg]}>
-            {item.mssg?.substring(0, 50).replace(/s+/, " ")}
+          <Text style={[s.chatMssg]} numberOfLines={1} ellipsizeMode="tail">
+            {item.mssg?.substring(0, 80).replace(/s+/, " ")}
           </Text>
         </View>
       </View>
@@ -63,14 +68,11 @@ function formatDate(timestamp) {
 
 const s = StyleSheet.create({
   chatItem: {
-    // flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 15,
-    borderBottomWidth: 0.3,
-    borderColor: "#4f4f4f",
-    flexDirection: "row",
     alignItems: "center",
-    gap: 25,
+    flexDirection: "row",
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    gap: 15,
   },
   chatTop: {
     // flex: 1,
@@ -80,9 +82,13 @@ const s = StyleSheet.create({
     // width: "90%",
   },
   chatName: {
-    fontSize: 19,
+    fontSize: 18,
     color: "white",
-    color: "#a4a4a4",
+    width: "85%",
+    // backgroundColor: "red",
+    fontWeight: 500,
+    color: "#e1e1e1",
+    overflow: "hidden",
   },
   chatMssg: {
     fontSize: 13,

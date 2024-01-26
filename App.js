@@ -18,6 +18,7 @@ import Profile from "./components/Profile";
 import DbChatScreen from "./DbChat/DbChatScreen";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import * as SQLite from "expo-sqlite";
 
 const Stack = createStackNavigator();
 
@@ -29,13 +30,15 @@ function Main() {
     setChats,
     getArrayFromAsyncStorage,
     setShowMenu,
+    dbChatList,
+    setDbChatList,
   } = useContext(DataContext);
   useEffect(() => {
-    // setChats([]);
     getArrayFromAsyncStorage("chats").then((data) => {
       if (data) setChats(data);
       console.log(data);
     });
+    get_sql_chat_list();
   }, []);
 
   async function get_sql_chat_list() {
