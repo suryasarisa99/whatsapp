@@ -10,7 +10,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useContext, useState } from "react";
+import * as FileSystem from "expo-file-system";
 import { DataContext } from "../DataContext";
+import * as IntentLauncher from "expo-intent-launcher";
 import {
   MaterialCommunityIcons,
   MaterialIcons,
@@ -53,13 +55,28 @@ export default function Profile({
       <View style={s.center}>
         {chatItem.hasImg ? (
           <Pressable
-            onPress={() => {
-              Linking.openURL(
-                getImageFile(
-                  `${chatItem.chatWith}|x|${chatItem.chatFrom}`,
-                  "image"
-                )
+            onPress={async () => {
+              const imageFile = getImageFile(
+                `${chatItem.chatWith}|x|${chatItem.chatFrom}.jpg`,
+                "image"
               );
+              const jsonFile = getImageFile(
+                `${chatItem.chatWith}|x|${chatItem.chatFrom}.json`,
+                ""
+              );
+              console.log(jsonFile);
+
+              // const contentUri = await FileSystem.getContentUriAsync(imageFile);
+
+              const jsonUri = await FileSystem.getContentUriAsync(jsonFile);
+              // Linking.openURL(contentUri);
+              console.log(jsonUri);
+              Linking.openURL(jsonUri);
+              // IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+              //   data: imageFile,
+              //   type: "image/*",
+              // });
+              // Linking.openURL();
             }}
             onLongPress={() => {
               console.log("long pressed");
@@ -82,7 +99,7 @@ export default function Profile({
               ]}
               source={{
                 uri: getImageFile(
-                  `${chatItem.chatWith}|x|${chatItem.chatFrom}`,
+                  `${chatItem.chatWith}|x|${chatItem.chatFrom}.jpg`,
                   "image"
                 ),
               }}

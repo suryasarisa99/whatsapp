@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, FlatList, Image } from "react-native";
-import { memo, useState, useContext } from "react";
+import { memo, useState, useContext, useRef } from "react";
 import { DataContext } from "../DataContext";
 import { StatusBar } from "expo-status-bar";
 import DbChatTopBar from "./DbChatTopBar";
@@ -9,6 +9,8 @@ import WaInput from "../components/WaInput";
 export default function DbChatScreen({ navigation, route }) {
   const { dbChat, setDbChat } = useContext(DataContext);
   const { chatItem } = route.params;
+  const [prvDate, setPrvDate] = useState();
+  const prvDateRef = useRef();
   return (
     <View style={s.container}>
       <StatusBar backgroundColor="#000000" />
@@ -17,7 +19,12 @@ export default function DbChatScreen({ navigation, route }) {
         inverted={true}
         data={[...dbChat].reverse()}
         renderItem={(itemData, index) => {
-          return <DbMessg item={itemData.item} />;
+          return (
+            <DbMessg
+              item={itemData.item}
+              {...{ prvDate, setPrvDate, prvDateRef }}
+            />
+          );
         }}
         keyExtractor={(item, index) => "inverted" + index.toString()}
         initialNumToRender={10}

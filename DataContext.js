@@ -76,13 +76,14 @@ export default function DataProvider({ children }) {
 
   const saveDataToFile = async (data, fileName) => {
     try {
-      const fileUri = FileSystem.documentDirectory + fileName;
+      const fileUri = FileSystem.documentDirectory + fileName + ".json";
       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(data));
       console.log("Data saved successfully!");
     } catch (error) {
       console.error("Error saving data:", error);
     }
   };
+
   const deleteFile = async (fileName) => {
     const fileUri = FileSystem.documentDirectory + fileName;
     try {
@@ -101,7 +102,7 @@ export default function DataProvider({ children }) {
   // Function to retrieve data from a file
   const retrieveDataFromFile = async (fileName) => {
     try {
-      const fileUri = FileSystem.documentDirectory + fileName;
+      const fileUri = FileSystem.documentDirectory + fileName + ".json";
       const fileContent = await FileSystem.readAsStringAsync(fileUri);
       const data = JSON.parse(fileContent);
       console.log("Data retrieved successfully!");

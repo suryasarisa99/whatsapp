@@ -124,6 +124,7 @@ export default function Home({ navigation }) {
       message.text_data as mssg, 
       message.message_type as type,
       message_media.file_path as image,
+      message.timestamp as date,
       GROUP_CONCAT(message_poll_option.option_name) as options
     FROM message
     LEFT JOIN 

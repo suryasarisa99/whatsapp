@@ -81,7 +81,7 @@ export default function Chat({ route, navigation }) {
               <Image
                 source={{
                   uri: getImageFile(
-                    `${chatItem.chatWith}|x|${chatItem.chatFrom}`,
+                    `${chatItem.chatWith}|x|${chatItem.chatFrom}.jpg`,
                     "thumb"
                   ),
                 }}

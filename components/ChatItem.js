@@ -20,7 +20,10 @@ export default function ChatItem({ item, onSelect }) {
           <Image
             style={{ width: 50, height: 50, borderRadius: 50 }}
             source={{
-              uri: getImageFile(`${item.chatWith}|x|${item.chatFrom}`, "thumb"),
+              uri: getImageFile(
+                `${item.chatWith}|x|${item.chatFrom}.jpg`,
+                "thumb"
+              ),
             }}
           />
         ) : (

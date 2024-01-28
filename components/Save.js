@@ -130,10 +130,14 @@ export default function Save({ date, mssg }) {
                 setChats((prv) => [...prv, x]);
                 saveDataToFile(data, chatWith + "|x|" + chatFrom);
                 if (image) {
-                  saveImageFile(image, chatWith + "|x|" + chatFrom, "image");
+                  saveImageFile(
+                    image,
+                    chatWith + "|x|" + chatFrom + ".jpg",
+                    "image"
+                  );
                   saveImageFile(
                     low_res_img,
-                    chatWith + "|x|" + chatFrom,
+                    chatWith + "|x|" + chatFrom + ".jpg",
                     "thumb"
                   );
                 }
